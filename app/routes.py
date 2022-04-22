@@ -8,9 +8,14 @@ class Planet:
         self.number_of_moons = number_of_moons
 
 planets = [
-    Planet(1, "Venus", "planet without moons", 0),
-    Planet(2, "Mercury", "hot rocky planet", 0),
-    Planet(3, "Mars", "red planet", 2)
+    Planet(1, "Mercury", "hot rocky planet", 0),
+    Planet(2, "Venus", "planet without moons", 0),
+    Planet(3, "Earth", "planet with human life", 1),
+    Planet(4, "Mars", "red planet", 2),
+    Planet(5, "Jupiter", "huge planet with red spot", 79),
+    Planet(6, "Saturn", "planet with rings", 82),
+    Planet(7, "Uranus", "ice giant planet", 27),
+    Planet(8, "Neptune", "supersonic wind planet", 14)
 ]
 
 planets_bp = Blueprint("planets_bp", __name__, url_prefix = "/planets")
