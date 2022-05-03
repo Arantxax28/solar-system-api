@@ -1,3 +1,5 @@
+import json
+import re
 from app import db
 from app.models.planets import Planet
 from flask import Blueprint, jsonify, abort, make_response, request
@@ -19,6 +21,16 @@ from flask import Blueprint, jsonify, abort, make_response, request
 #     Planet(7, "Uranus", "ice giant planet", 27),
 #     Planet(8, "Neptune", "supersonic wind planet", 14)
 # ]
+# def validate_planet(planet_id):
+#     try:
+#         planet_id = int(planet_id)
+#     except:
+#         abort(make_response({"error message":f"Planet {planet_id} invalid"},400))
+#     for planet in planets:
+#         if planet.id == planet_id:
+#             return planet
+#     abort(make_response({"error message":f"Could not find planet with id: {planet_id}."},404))
+
 
 planets_bp = Blueprint("planets_bp", __name__, url_prefix = "/planets")
 
@@ -54,17 +66,80 @@ def get_all_planets():
         )
     return jsonify(planets_response)
 
+@planets_bp.route("/<planet_id>", methods=["GET"])
+def get_one_planet(planet_id):
+    try: 
+        planet_id = int(planet_id)
+    except ValueError:
+        response = {
+            "message" : f"Invalid id: {planet_id}"}
+        return jsonify(response), 400
+    chosen_planet = Planet.query.get(planet_id)
+
+    if chosen_planet is None:
+        response = {"message": f" Could not find a planet with id {planet_id}"}
+        return jsonify(response), 404
+    
+    response = { "id" : chosen_planet.id,
+                    "name": chosen_planet.name,
+                    "description": chosen_planet.description,
+                    "number_of_moons": chosen_planet.number_of_moons}
+    return jsonify(response), 200
+
+@planets_bp.route("/<planet_id>", methods = ["PUT"])
+def replace_planet(planet_id):
+    try: 
+        planet_id = int(planet_id)
+    except ValueError:
+        response = {"message":f"Invalid id {planet_id}"}
+        return jsonify(response), 400
+    
+    chosen_planet = Planet.query.get(planet_id)
+
+    if chosen_planet is None:
+        response = {"message": f"Could not find planet with id {planet_id}"}
+        return jsonify(response), 404
+    
+    request_body = request.get_json()
+
+    try:
+        chosen_planet.name = request_body["name"]
+        chosen_planet.description = request_body["description"]
+        chosen_planet.number_of_moons = request_body["number_of_moons"]
+    
+    except KeyError:
+        return {
+            "message": "name, description, and number_of_moons are required"
+        } , 400
+
+    db.session.commit()
+
+    return {
+        "message": f"planet #{chosen_planet.id} successfully replaced"
+    }, 200
+
+@planets_bp.route("/<planet_id>", methods = ["DELETE"])
+def delete_planet(planet_id):
+    try: 
+        planet_id = int(planet_id)
+    except ValueError:
+        response = {"message":f"Invalid id {planet_id}"}
+        return jsonify(response), 400
+    
+    chosen_planet = Planet.query.get(planet_id)
+
+    if chosen_planet is None:
+        response = {"message": f"Could not find planet with id {planet_id}"}
+        return jsonify(response), 404
+
+    db.session.delete(chosen_planet)
+    db.session.commit()
+
+    return {
+        "message": f"planet #{chosen_planet.id} successfully removed"
+    }, 200
 
 
-# def validate_planet(planet_id):
-#     try:
-#         planet_id = int(planet_id)
-#     except:
-#         abort(make_response({"error message":f"Planet {planet_id} invalid"},400))
-#     for planet in planets:
-#         if planet.id == planet_id:
-#             return planet
-#     abort(make_response({"error message":f"Could not find planet with id: {planet_id}."},404))
 
 # @planets_bp.route("", methods = ["GET"])
 # def get_all_planets():
@@ -77,19 +152,6 @@ def get_all_planets():
 #             "number_of_moons" : planet.number_of_moons
 #         })
 #     return jsonify(planet_response)
-
-# @planets_bp.route("/<planet_id>", methods=["GET"])
-# def get_one_planet(planet_id):
-#     planet = validate_planet(planet_id)
-
-
-#     response = {
-#         "id" : planet.id,
-#         "name" : planet.name,
-#         "description" : planet.description,
-#         "number_of_moons" : planet.number_of_moons
-#     }
-#     return jsonify(response),200
 
 
         
