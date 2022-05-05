@@ -13,7 +13,7 @@ def create_app(testing=False):
 
 
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    if testing == {"testing": True}:
+    if testing == {"Testing": True}:
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("TESTING_SQLALCHEMY_DATABASE_URI")
     else:
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("SQLALCHEMY_DATABASE_URI")
