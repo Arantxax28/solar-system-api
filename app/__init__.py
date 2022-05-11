@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from dotenv import load_dotenv
 import os
+from app.models.planets import Planet 
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -18,7 +19,7 @@ def create_app(testing=False):
     else:
         app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("SQLALCHEMY_DATABASE_URI")
 
-    from app.models.planets import Planet 
+    
 
     db.init_app(app)
     migrate.init_app(app, db) 
